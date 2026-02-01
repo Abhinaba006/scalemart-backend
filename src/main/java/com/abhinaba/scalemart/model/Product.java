@@ -20,4 +20,7 @@ public class Product {
     @NotNull(message = "Price is required")
     private Double price;
     private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private Users seller;
 }
