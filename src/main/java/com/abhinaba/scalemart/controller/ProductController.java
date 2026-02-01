@@ -1,5 +1,6 @@
 package com.abhinaba.scalemart.controller;
 
+import com.abhinaba.scalemart.dto.ProductDTO;
 import com.abhinaba.scalemart.model.Product;
 import com.abhinaba.scalemart.service.ProductService;
 import jakarta.validation.Valid;
@@ -8,6 +9,7 @@ import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,8 +38,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product createProduct(@Valid @RequestBody Product product) {
-        return productService.addProduct(product);
+    public Product createProduct(@Valid @RequestBody ProductDTO productDTO) {
+        return productService.addProduct(productDTO);
     }
 
     // GET /products/1
@@ -52,7 +54,7 @@ public class ProductController {
         productService.deleteProduct(id);
     }
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id, @Valid @RequestBody Product product) {
+    public Product updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDTO product) {
         return productService.updateProduct(id, product);
     }
 
@@ -70,6 +72,19 @@ public class ProductController {
             e.printStackTrace();
             return "Job Failed: " + e.getMessage();
         }
+
+
+    }
+
+    @GetMapping("/seller/{username}")
+    public ResponseEntity<List<Product>> getProductsBySellerUsername(@PathVariable String username) {
+        List<Product> products = productService.getProductsBySellerUsername(username);
+
+        if (products.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Returns 204 No Content if list is empty
+        }
+
+        return ResponseEntity.ok(products);
     }
 
 }
