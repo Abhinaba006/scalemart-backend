@@ -3,6 +3,11 @@ package com.abhinaba.scalemart.controller;
 import com.abhinaba.scalemart.model.Product;
 import com.abhinaba.scalemart.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.batch.core.job.Job;
+
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,9 +18,17 @@ public class ProductController {
 
     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
+    // --- BATCH VARIABLES ---
+    private final JobOperator jobOperator;
+    private final Job job;
+
+    // Constructor Injection for Service + Batch Components
+    public ProductController(ProductService productService, JobOperator jobOperator, Job job) {
         this.productService = productService;
+        this.jobOperator = jobOperator;
+        this.job = job;
     }
+
 
     @GetMapping
     public List<Product> getAllProducts() {
@@ -42,4 +55,21 @@ public class ProductController {
     public Product updateProduct(@PathVariable Long id, @Valid @RequestBody Product product) {
         return productService.updateProduct(id, product);
     }
+
+    @PostMapping("/batch/import")
+    public String importCsvToDb() {
+        try {
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addLong("startAt", System.currentTimeMillis())
+                    .toJobParameters();
+
+            jobOperator.start(job, jobParameters);
+
+            return "Batch Job Started Successfully!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Job Failed: " + e.getMessage();
+        }
+    }
+
 }
