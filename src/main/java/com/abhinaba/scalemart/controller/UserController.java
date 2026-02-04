@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
@@ -23,6 +23,20 @@ public class UserController {
             return ResponseEntity.ok("User registered successfully via ID: " + newUser.getId());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Users> searchUser(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String username) {
+        
+        if (email != null) {
+            return ResponseEntity.ok(userService.getUserByEmail(email));
+        } else if (username != null) {
+            return ResponseEntity.ok(userService.getUserByUsername(username));
+        } else {
+            return ResponseEntity.badRequest().build();
         }
     }
 }
